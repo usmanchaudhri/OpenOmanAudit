@@ -36,11 +36,21 @@ model Audit {
   milestoneAttachmentName  String?
   pbcAttachmentUrl         String?
   pbcAttachmentName        String?
+  engagementStage          String       @default("Onboarding")
+  stageOwner               String?
+  dueDate                  DateTime?
+  auditYear                String?
+  releasedAt               DateTime?
+  releasedBy               String?
+  releasedReportUrl        String?
+  releasedReportName       String?
   createdAt               DateTime     @default(now())
   updatedAt               DateTime     @updatedAt
   procedures              Procedure[]
   procedureGroups         ProcedureGroup[]
   teamMembers             TeamMember[]
+  documentRequests        DocumentRequest[]
+  stageEvents             StageEvent[]
 }
 
 model TeamMember {
@@ -158,6 +168,34 @@ model TemplateProcedure {
   
   template     AuditTemplate @relation(fields: [templateId], references: [id], onDelete: Cascade)
   group        TemplateGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model DocumentRequest {
+  id         String   @id @default(uuid())
+  auditId    String
+  name       String
+  status     String   @default("Missing")
+  note       String?
+  fileUrl    String?
+  fileName   String?
+  updatedBy  String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  audit      Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
+}
+
+model StageEvent {
+  id          String   @id @default(uuid())
+  auditId     String
+  fromStage   String
+  toStage     String
+  action      String
+  note        String?
+  performedBy String
+  createdAt   DateTime @default(now())
+
+  audit       Audit    @relation(fields: [auditId], references: [id], onDelete: Cascade)
 }
 
 model AuditLog {

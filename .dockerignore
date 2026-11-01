@@ -16,3 +16,10 @@ coverage
 README.md
 .pnpm-store
 .jules
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+prisma/data
+storage/uploads
+samples

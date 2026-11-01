@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 
-const ALLOWED_ROLES = ['Auditor', 'Specialist', 'IT Administrator', 'Business Operations', 'Audit Manager', 'Audit Director'];
+import { ALLOWED_ROLES } from '@/lib/engagement';
 
 export async function PATCH(
   req: Request,

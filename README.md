@@ -1,8 +1,8 @@
-# OpenWorkpaper: Open Source Audit Management System
+# OpenOman Audit Manager: Audit Management Software
 
-OpenWorkpaper is a simple, modern, and open-source web application designed for auditors to document audit programs and procedures. It streamlines the audit lifecycle across Planning, Fieldwork, and Reporting phases with built-in sign-off tracking, reviewer collaboration, and professional document export.
+OpenOman Audit Manager is a simple, modern, and open-source web application designed for auditors to document audit programs and procedures. It streamlines the audit lifecycle across Planning, Fieldwork, and Reporting phases with built-in sign-off tracking, reviewer collaboration, and professional document export.
 
-Deploy OpenWorkpaper on your terms with complete infrastructure-agnostic flexibility. Our open-source architecture gives you the freedom to run the platform locally for private testing, self-host it within your own secure network for maximum data sovereignty, or scale easily in the cloud. By leveraging a fully containerized design, OpenWorkpaper ensures that you always retain full ownership of your sensitive audit data, regardless of where you choose to host it.
+Deploy OpenOman Audit Manager on your terms with complete infrastructure-agnostic flexibility. Our open-source architecture gives you the freedom to run the platform locally for private testing, self-host it within your own secure network for maximum data sovereignty, or scale easily in the cloud. By leveraging a fully containerized design, OpenOman Audit Manager ensures that you always retain full ownership of your sensitive audit data, regardless of where you choose to host it.
 
 ## 🌟 Background & Mission
 
@@ -34,7 +34,7 @@ The purpose of this project is to provide free, open-source audit software to au
 
 ## 🔐 Roles & Permissions (RBAC)
 
-OpenWorkpaper uses a granular **Role-Based Access Control (RBAC)** model to ensure data integrity and proper audit oversight. Access is controlled at two levels: system-wide roles and audit-specific team assignments.
+OpenOman Audit Manager uses a granular **Role-Based Access Control (RBAC)** model to ensure data integrity and proper audit oversight. Access is controlled at two levels: system-wide roles and audit-specific team assignments.
 
 ### System Roles
 
@@ -75,9 +75,9 @@ Key team roles include:
 
 ## 👔 Business Readiness
 
-OpenWorkpaper was built with the specific needs of **CPA Firms** and **Internal Audit Departments** in mind:
+OpenOman Audit Manager was built with the specific needs of **CPA Firms** and **Internal Audit Departments** in mind:
 
-*   **Private Cloud Deployment**: Unlike standard SaaS, you can deploy OpenWorkpaper within your own Virtual Private Cloud (VPC), ensuring your sensitive client data never leaves your control.
+*   **Private Cloud Deployment**: Unlike standard SaaS, you can deploy OpenOman Audit Manager within your own Virtual Private Cloud (VPC), ensuring your sensitive client data never leaves your control.
 *   **SQLite Portability**: Your entire database is a single file. This makes off-site backups, disaster recovery, and data archiving as simple as copying a folder.
 *   **Self-Healing Reliability**: Built-in logic repairs database schema drifts automatically, ensuring the system stays online during infrastructure updates.
 *   **Audit Logging**: Every login and major record change is tracked to ensure accountability.
@@ -88,15 +88,15 @@ OpenWorkpaper was built with the specific needs of **CPA Firms** and **Internal 
 For production deployments, it is critical to secure the application with HTTPS and properly configure Single Sign-On (SSO) if required.
 
 ### 🖥️ Recommended System Specifications
-OpenWorkpaper is highly efficient and designed to scale vertically. For an organization with up to **200 concurrent auditors**, we recommend the following minimum server specifications to ensure a fast, responsive user experience:
+OpenOman Audit Manager is highly efficient and designed to scale vertically. For an organization with up to **200 concurrent auditors**, we recommend the following minimum server specifications to ensure a fast, responsive user experience:
 *   **CPU:** 2 to 4 vCPUs
 *   **Memory:** 4GB to 8GB RAM
 *   **Storage:** 20GB+ SSD (Storage needs will scale depending on the size and volume of uploaded attachments)
 
-*Note: Because OpenWorkpaper utilizes a highly optimized SQLite Write-Ahead Log (WAL) architecture, the database natively supports high-concurrency read/write operations without locking. The recommended specifications primarily ensure the Node.js frontend and API can seamlessly handle the concurrent traffic volume.*
+*Note: Because OpenOman Audit Manager utilizes a highly optimized SQLite Write-Ahead Log (WAL) architecture, the database natively supports high-concurrency read/write operations without locking. The recommended specifications primarily ensure the Node.js frontend and API can seamlessly handle the concurrent traffic volume.*
 
 ### 🌐 HTTPS & Reverse Proxy (Recommended)
-OpenWorkpaper provides a streamlined way to deploy with HTTPS using a built-in Nginx reverse proxy configuration. This method handles SSL/TLS termination and automatically redirects insecure HTTP traffic to HTTPS.
+OpenOman Audit Manager provides a streamlined way to deploy with HTTPS using a built-in Nginx reverse proxy configuration. This method handles SSL/TLS termination and automatically redirects insecure HTTP traffic to HTTPS.
 
 #### Prerequisites
 Before deploying with HTTPS, you must:
@@ -112,7 +112,7 @@ Use the secure Docker Compose configuration:
 ```bash
 docker compose -f docker-compose.secure.yml up -d --build
 ```
-This command starts both the OpenWorkpaper application and an Nginx container. The application will be accessible only via HTTPS on port 443.
+This command starts both the OpenOman Audit Manager application and an Nginx container. The application will be accessible only via HTTPS on port 443.
 
 ---
 
@@ -120,26 +120,26 @@ This command starts both the OpenWorkpaper application and an Nginx container. T
 
 | Variable | Requirement | Description |
 | :--- | :--- | :--- |
-| **`DATABASE_URL`** | **Required** | Path to the SQLite database. <br>• **Docker (All Modes)**: `file:/app/prisma/data/dev.db`<br>• **Manual/Host**: `file:./prisma/data/dev.db` |
+| **`DATABASE_URL`** | **Required** | Path to the SQLite database. <br>• **Docker (All Modes)**: `file:/app/prisma/data/dev.db`<br>• **Manual/Host**: `file:./prisma/data/dev.db`<br>• **Railway**: leave unset. A volume mounted at `/data` is used automatically. |
 | **`JWT_SECRET`** | **Required** | A secure random string used to sign session tokens. **Must be changed for production** to prevent session hijacking. |
 | **`ADMIN_SEED_PASSWORD`** | **Required (Prod)** | Initial password used to seed default accounts (`it.admin` and `biz.ops`). **Must be set before first run.** |
 | **`SESSION_DURATION_SECONDS`** | Optional | How long a user remains logged in (default `3600` or 1 hour). |
 | **`NODE_ENV`** | **Required** | Set to `production` for live deployments to enable optimizations and strict security checks. Use `development` for local coding. |
-| **`PORT`** | Optional | The internal port the app listens on (default `3000`). Even with HTTPS, this internal port usually stays as `3000`. |
+| **`PORT`** | Optional | The internal port the app listens on (default `3000`). Railway sets this automatically; do not override it there. |
 
 ---
 
 ### 🔑 SSO (OIDC) Configuration
-OpenWorkpaper supports any OpenID Connect (OIDC) compliant Identity Provider (IDP) such as Microsoft Entra ID (Azure AD), Okta, or Keycloak.
+OpenOman Audit Manager supports any OpenID Connect (OIDC) compliant Identity Provider (IDP) such as Microsoft Entra ID (Azure AD), Okta, or Keycloak.
 
 To enable SSO, configure the following environment variables in your `.env` file:
 
 | Variable | Description | Example |
 | :--- | :--- | :--- |
-| `NEXT_PUBLIC_BASE_URL` | The external URL of your OpenWorkpaper instance (used for redirect URIs). | `https://openworkpaper.your-agency.gov` |
+| `NEXT_PUBLIC_BASE_URL` | The external URL of your OpenOman Audit Manager instance (used for redirect URIs). | `https://openworkpaper.your-agency.gov` |
 | `SSO_ISSUER_URL` | The base URL of your OIDC Identity Provider. | `https://login.microsoftonline.com/tenant-id/v2.0` |
-| `SSO_CLIENT_ID` | The Client ID assigned to OpenWorkpaper by your IDP. | `00000000-0000-0000-0000-000000000000` |
-| `SSO_CLIENT_SECRET` | The Client Secret assigned to OpenWorkpaper by your IDP. | `your-secure-client-secret` |
+| `SSO_CLIENT_ID` | The Client ID assigned to OpenOman Audit Manager by your IDP. | `00000000-0000-0000-0000-000000000000` |
+| `SSO_CLIENT_SECRET` | The Client Secret assigned to OpenOman Audit Manager by your IDP. | `your-secure-client-secret` |
 
 > **Note**: The current implementation assumes standard OIDC paths (`/auth` for authorization and `/token` for token exchange) relative to the `SSO_ISSUER_URL`. If your provider uses different paths (e.g., `/authorize`), you may need to adjust the endpoints in `src/app/api/auth/sso/login/route.ts`.
 
@@ -150,7 +150,7 @@ To enable SSO, configure the following environment variables in your `.env` file
 
 ## 💾 Backup & Disaster Recovery
 
-OpenWorkpaper provides robust data portability and recovery options:
+OpenOman Audit Manager provides robust data portability and recovery options:
 
 1.  **Word Export**: For professional reporting and off-system review, click the **Export Word** button in any audit. This generates a grouped, professional document of all procedures.
 2.  **Full System Backup**: To save the entire state of an audit (including all metadata and attachment files), use the **Backup Audit** button on the audit detail page. This generates a `.zip` file containing:
@@ -164,7 +164,23 @@ OpenWorkpaper provides robust data portability and recovery options:
 
 ## 💻 Installation & Deployment
 
-OpenWorkpaper is designed for complete infrastructure-agnostic flexibility. Whether you are a solo practitioner or a large firm, choose the method that fits your IT environment.
+OpenOman Audit Manager is designed for complete infrastructure-agnostic flexibility. Whether you are a solo practitioner or a large firm, choose the method that fits your IT environment.
+
+### Deploy on Railway
+
+The repository includes a `Dockerfile` and `railway.toml`. Railway builds that image, and the container listens on Railway's `PORT`.
+
+1. Create a Railway project and deploy this repository. Railway detects `railway.toml` and builds with Docker.
+2. In the service variables, set:
+   * `JWT_SECRET` to a long random string. Keep this value stable across deploys or existing sessions stop working.
+   * `ADMIN_SEED_PASSWORD` to the first password for `it.admin` and `biz.ops`. This is required. The container exits on startup without it. Both accounts are asked to change the password at first login.
+   * `NODE_ENV` = `production`.
+   * Do not set `PORT`. Leave `DATABASE_URL` unset.
+3. Add a volume mounted at `/data`. The database is stored at `/data/data/dev.db` and uploaded files at `/data/uploads`. Without this volume, both are deleted on every deploy.
+4. Keep the service at one replica. SQLite cannot be shared by two running copies.
+5. Deploy. Railway calls `GET /api/health` and waits until the database is ready. Open the generated `*.up.railway.app` URL and sign in as `it.admin` or `biz.ops`.
+
+SSO is optional. If you enable it, set `NEXT_PUBLIC_BASE_URL` to the public Railway URL, including `https://`.
 
 ### ✅ Prerequisites (Container Methods)
 To use the container deployment methods below, you must have Docker or Podman (with compose support) installed on your server or local machine. 
@@ -172,7 +188,7 @@ To use the container deployment methods below, you must have Docker or Podman (w
 > **Note**: For a complete list of all internal libraries, security dependencies, and infrastructure requirements for IT approval, please see **[DEPENDENCIES.md](DEPENDENCIES.md)**.
 
 ### 🫙 Method 1: Docker or Podman Deployment (Recommended)
-This is the professional standard for deploying OpenWorkpaper. We recommend Option A for all production environments. (Note for Podman users: The commands below use ⁠docker compose⁠, but you can seamlessly substitute ⁠podman compose⁠ or rely on your Docker alias.)
+This is the professional standard for deploying OpenOman Audit Manager. We recommend Option A for all production environments. (Note for Podman users: The commands below use ⁠docker compose⁠, but you can seamlessly substitute ⁠podman compose⁠ or rely on your Docker alias.)
 
 
 1.  **Clone & Prepare**:
@@ -208,7 +224,7 @@ This is the professional standard for deploying OpenWorkpaper. We recommend Opti
 ---
 
 ### 🛠 Method 2: Manual Installation (Node.js)
-If you prefer to run OpenWorkpaper directly on your host machine or have a custom Windows Server environment without Docker.
+If you prefer to run OpenOman Audit Manager directly on your host machine or have a custom Windows Server environment without Docker.
 
 #### 1. Prerequisites
 *   [Node.js](https://nodejs.org/) (v18 or later)
@@ -246,7 +262,7 @@ Once running, sign in with:
 ## 🛠 Maintenance & Updates
 
 ### Data Persistence
-OpenWorkpaper is designed to be updated without data loss. Permanent data is stored using two methods:
+OpenOman Audit Manager is designed to be updated without data loss. Permanent data is stored using two methods:
 
 #### Named Docker Volumes (Application Data)
 These volumes are managed by Docker and persist across container restarts and updates.

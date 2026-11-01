@@ -1,11 +1,11 @@
 # Security & Compliance Policy
 
-OpenWorkpaper is designed with security standards in mind.
+OpenOman Audit Manager is designed with security standards in mind.
 
 ## Security Controls
 
 ### Transport Layer Security (TLS)
-OpenWorkpaper is configured to be HTTPS. 
+OpenOman Audit Manager is configured to be HTTPS. 
 - **HSTS:** Enabled with a 2-year `max-age`.
 - **Encryption:** All data in transit must be encrypted using FIPS-validated cryptographic modules (e.g., TLS 1.2+).
 
@@ -25,7 +25,7 @@ OpenWorkpaper is configured to be HTTPS.
 
 ## Reporting a Vulnerability
 
-We take the security of OpenWorkpaper seriously. If you discover a security vulnerability, please open a pull request.
+We take the security of OpenOman Audit Manager seriously. If you discover a security vulnerability, please open a pull request.
 
 ### Our Commitment
 

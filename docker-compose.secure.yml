@@ -3,7 +3,7 @@ services:
     build: .
     # Note: No ports mapping here. App is only accessible via the 'nginx' service.
     volumes:
-      - openworkpaper-uploads:/app/public/uploads
+      - openworkpaper-uploads:/app/storage/uploads
       - openworkpaper-db:/app/prisma/data
     environment:
       - JWT_SECRET=${JWT_SECRET}

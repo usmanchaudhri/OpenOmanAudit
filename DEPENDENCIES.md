@@ -1,9 +1,9 @@
-# OpenWorkpaper: Software & Security Compliance (Dependencies)
+# OpenOman Audit Manager: Software & Security Compliance (Dependencies)
 
-This document provides a comprehensive list of all software dependencies, libraries, and infrastructure requirements for OpenWorkpaper. This is intended for use by IT Administrators, Security Officers, and Compliance departments during the software approval process.
+This document provides a comprehensive list of all software dependencies, libraries, and infrastructure requirements for OpenOman Audit Manager. This is intended for use by IT Administrators, Security Officers, and Compliance departments during the software approval process.
 
 ## 1. Core Platform Architecture
-OpenWorkpaper is built on a minimal, security-hardened Linux base.
+OpenOman Audit Manager is built on a minimal, security-hardened Linux base.
 
 *   **Operating System**: Debian (via Docker `bookworm-slim`)
 *   **Runtime**: Node.js 22 (LTS)
@@ -44,7 +44,7 @@ The following libraries are included in the production build:
 | **SSO / OIDC** | NextAuth.js / Auth.js | Supports SAML, OAuth2, and Entra ID (Azure AD). |
 | **Input Validation** | DOMPurify | Automatic scrubbing of rich text input to prevent XSS. |
 | **Database Encryption** | Volume Encryption | Recommended at the infrastructure/cloud level. |
-| **HTTPS (SSL/TLS)** | Required for secure production access. OpenWorkpaper supports standard `.pem` certificates. |
+| **HTTPS (SSL/TLS)** | Required for secure production access. OpenOman Audit Manager supports standard `.pem` certificates. |
 | **RBAC** | Built-in | Role-based access control for Admins, Managers, and Auditors. |
 
 ## 5. Development & Build Tools

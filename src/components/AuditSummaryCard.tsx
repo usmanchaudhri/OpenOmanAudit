@@ -1,18 +1,22 @@
 import Link from 'next/link';
 import { ChevronRight } from 'lucide-react';
 import type { Audit } from '@prisma/client';
+import { stageByKey } from '@/lib/engagement';
 
 export interface AuditWithCount extends Audit {
   _count?: {
     procedures: number;
   };
   reviewedCount?: number;
+  documentRequests?: { status: string }[];
+  stageEvents?: { action: string; toStage: string; createdAt: Date | string }[];
 }
 
 export function AuditSummaryCard({ audit }: { audit: AuditWithCount }) {
   const totalProcedures = audit._count?.procedures || 0;
   const reviewedProcedures = audit.reviewedCount || 0;
   const progress = totalProcedures > 0 ? Math.round((reviewedProcedures / totalProcedures) * 100) : 0;
+  const stage = stageByKey(audit.engagementStage || 'Onboarding');
 
   return (
     <Link key={audit.id} href={`/audits/${audit.id}`} className="block group">
@@ -60,7 +64,7 @@ export function AuditSummaryCard({ audit }: { audit: AuditWithCount }) {
             <div className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded border ${
               audit.status === 'Completed' ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-blue-50 text-blue-600 border-blue-200'
             }`}>
-              {audit.status}
+              {stage.shortLabel} · {audit.status}
             </div>
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-tighter">
               {reviewedProcedures}/{totalProcedures} Reviewed

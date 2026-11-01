@@ -3,7 +3,7 @@ import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import bcrypt from 'bcryptjs';
 
-const ALLOWED_ROLES = ['Auditor', 'Specialist', 'IT Administrator', 'Business Operations', 'Audit Manager', 'Audit Director'];
+import { ALLOWED_ROLES } from '@/lib/engagement';
 
 function validatePassword(password: string): boolean {
   const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{12,}$/;

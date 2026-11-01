@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { canAccessAudit } from '@/lib/audit-access';
+import { isClientRole } from '@/lib/engagement';
 import type { Audit } from '@prisma/client';
 import fs from 'fs/promises';
 import path from 'path';
@@ -133,6 +134,14 @@ export async function GET(req: Request, props: { params: Promise<{ id: string }>
     return NextResponse.json({ error: 'Audit not found' }, { status: 404 });
   }
 
+  if (isClientRole(session.user.role)) {
+    return NextResponse.json({
+      ...audit,
+      procedureGroups: [],
+      procedures: [],
+    });
+  }
+
   // 2. Fetch procedure groups and ungrouped procedures
   const { procedureGroups, procedures } = await getAuditProcedures(audit.id);
 
@@ -156,8 +165,16 @@ export async function PUT(req: Request, props: { params: Promise<{ id: string }>
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
     const hasAccess = await canAccessAudit(session.user, params.id);
-    if (!hasAccess) {
+    if (!hasAccess || isClientRole(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const currentRelease = await prisma.audit.findUnique({
+      where: { id: params.id },
+      select: { releasedAt: true },
+    });
+    if (currentRelease?.releasedAt) {
+      return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
     }
 
     const data = await req.json();

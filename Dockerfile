@@ -37,7 +37,7 @@ RUN groupadd --system --gid 1001 nodejs
 RUN useradd --system --uid 1001 --create-home nextjs
 
 # Set up directory structure and permissions
-RUN mkdir -p .next public/uploads prisma/data && chown -R nextjs:nodejs /app
+RUN mkdir -p .next public/uploads storage/uploads prisma/data && chown -R nextjs:nodejs /app
 
 # Copy all the necessary files for the application
 # Copy full node_modules first to ensure prisma CLI is available for entrypoint
@@ -53,14 +53,12 @@ COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-ent
 
 RUN chmod +x docker-entrypoint.sh
 
-USER nextjs
-
 EXPOSE 3000
 
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:3000/api/health || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=90s --retries=5 \
+  CMD sh -c 'curl -fsS "http://127.0.0.1:${PORT:-3000}/api/health" || exit 1'
 
 ENTRYPOINT ["/app/docker-entrypoint.sh"]

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
+import { STANDARD_DOCUMENTS } from '@/lib/engagement';
 
 export async function GET() {
   const session = await getSession();
@@ -42,6 +43,7 @@ export async function POST(req: Request) {
   }
 
   const data = await req.json();
+  const dueDate = data.dueDate ? new Date(data.dueDate) : null;
   const audit = await prisma.audit.create({
     data: {
       title: data.title,
@@ -49,7 +51,23 @@ export async function POST(req: Request) {
       category: data.category,
       auditNumber: data.auditNumber,
       objective: data.objective,
+      auditYear: typeof data.auditYear === 'string' ? data.auditYear.trim() || null : null,
+      dueDate: dueDate && !Number.isNaN(dueDate.getTime()) ? dueDate : null,
       status: data.status || 'In Progress',
+      engagementStage: 'Onboarding',
+      stageOwner: session?.user?.username || 'Coordinator',
+      documentRequests: {
+        create: STANDARD_DOCUMENTS.map((name) => ({ name, status: 'Missing' })),
+      },
+      stageEvents: {
+        create: {
+          fromStage: 'Onboarding',
+          toStage: 'Onboarding',
+          action: 'open',
+          note: 'Engagement opened',
+          performedBy: session?.user?.username || 'System',
+        },
+      },
     }
   });
 

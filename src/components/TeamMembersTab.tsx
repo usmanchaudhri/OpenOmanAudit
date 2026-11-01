@@ -268,6 +268,11 @@ export default function TeamMembersTab({
                           className="w-full pl-5 pr-10 py-3.5 bg-gray-50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-blue-500/50 focus:bg-white transition-all text-gray-900 appearance-none font-semibold text-sm outline-none shadow-inner"
                         >
                           <option value="">Select Title</option>
+                          <option value="Client">Client</option>
+                          <option value="Coordinator">Coordinator</option>
+                          <option value="Preparer">Preparer</option>
+                          <option value="Reviewer">Reviewer</option>
+                          <option value="Licensed Auditor">Licensed Auditor</option>
                           <option value="Audit Director">Audit Director</option>
                           <option value="Audit Partner">Audit Partner</option>
                           <option value="Audit Manager">Audit Manager</option>

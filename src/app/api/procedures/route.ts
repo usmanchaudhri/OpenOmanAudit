@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { canAccessAudit } from '@/lib/audit-access';
+import { isClientRole } from '@/lib/engagement';
 
 export async function GET(req: Request) {
   try {
@@ -25,7 +26,7 @@ export async function GET(req: Request) {
 
     // Authorization
     const allowed = await canAccessAudit(session.user, auditId);
-    if (!allowed) {
+    if (!allowed || isClientRole(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
     }
 
@@ -112,6 +113,17 @@ export async function POST(req: Request) {
     // Strict input validation
     if (!isValidCreateInput(data)) {
       return NextResponse.json({ error: 'Invalid input data' }, { status: 400 });
+    }
+
+    if (isClientRole(session.user.role)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+    const released = await prisma.audit.findUnique({
+      where: { id: data.auditId },
+      select: { releasedAt: true },
+    });
+    if (released?.releasedAt) {
+      return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
     }
 
     const { auditId, phase, groupId, title, purpose } = data;

@@ -1,5 +1,5 @@
 /** 
- * OpenWorkpaper Dashboard - Unified Task Engine
+ * OpenOman Audit Manager Dashboard - Unified Task Engine
  */
 import { prisma } from '@/lib/prisma';
 import { Prisma } from '@prisma/client';
@@ -11,6 +11,8 @@ import DashboardStats from '@/components/DashboardStats';
 import { redirect } from 'next/navigation';
 import ManagementInsights from '@/components/ManagementInsights';
 import { AuditSummaryCard, type AuditWithCount } from '@/components/AuditSummaryCard';
+import EngagementBoard, { type EngagementRow } from '@/components/engagement/EngagementBoard';
+import { isClientRole, stageByKey } from '@/lib/engagement';
 
 export const dynamic = 'force-dynamic';
 
@@ -39,6 +41,44 @@ export default async function DashboardPage() {
     redirect('/admin/users');
   }
 
+  if (isClientRole(user.role)) {
+    const clientAudits = await prisma.audit.findMany({
+      where: { teamMembers: { some: { userId: user.id } } },
+      orderBy: { updatedAt: 'desc' },
+      select: {
+        id: true,
+        title: true,
+        auditYear: true,
+        engagementStage: true,
+        dueDate: true,
+        releasedAt: true,
+      },
+    });
+
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 py-8 px-4">
+        <div>
+          <h1 className="text-4xl font-black text-slate-900 tracking-tight">Your audits</h1>
+          <p className="text-slate-500 mt-2">Checklist, requests, progress, and released reports for your company only.</p>
+        </div>
+        {clientAudits.length === 0 ? (
+          <p className="text-sm text-slate-500">You are not on an engagement yet.</p>
+        ) : clientAudits.map((audit) => {
+          const stage = stageByKey(audit.engagementStage || 'Onboarding');
+          return (
+            <Link key={audit.id} href={`/audits/${audit.id}`} className="block bg-white rounded-[2rem] border border-slate-200 p-6 hover:border-blue-300">
+              <h2 className="text-xl font-bold text-slate-900">{audit.title}</h2>
+              <p className="text-sm text-slate-500 mt-1">
+                {audit.auditYear || 'Audit'} · stage {stage.number} of 7 · {stage.key}
+                {audit.releasedAt ? ' · report released' : ''}
+              </p>
+            </Link>
+          );
+        })}
+      </div>
+    );
+  }
+
   const isGlobalManager = user.role === 'Business Operations';
   const userMatch = user.username;
   const userId = user.id;
@@ -46,13 +86,21 @@ export default async function DashboardPage() {
   let audits: AuditWithCount[] = [];
   if (isGlobalManager) {
     audits = await prisma.audit.findMany({
-      include: { _count: { select: { procedures: true } } },
+      include: {
+        _count: { select: { procedures: true } },
+        documentRequests: { select: { status: true } },
+        stageEvents: { select: { action: true, toStage: true, createdAt: true } },
+      },
       orderBy: { updatedAt: 'desc' }
     });
   } else {
     audits = await prisma.audit.findMany({
       where: { teamMembers: { some: { userId: userId } } },
-      include: { _count: { select: { procedures: true } } },
+      include: {
+        _count: { select: { procedures: true } },
+        documentRequests: { select: { status: true } },
+        stageEvents: { select: { action: true, toStage: true, createdAt: true } },
+      },
       orderBy: { updatedAt: 'desc' }
     });
   }
@@ -195,6 +243,21 @@ export default async function DashboardPage() {
           </div>
         )}
       </div>
+
+      <EngagementBoard rows={processedAudits.map((audit): EngagementRow => ({
+        id: audit.id,
+        title: audit.title,
+        engagementStage: audit.engagementStage || 'Onboarding',
+        stageOwner: audit.stageOwner,
+        dueDate: audit.dueDate ? new Date(audit.dueDate).toISOString() : null,
+        releasedAt: audit.releasedAt ? new Date(audit.releasedAt).toISOString() : null,
+        documentRequests: audit.documentRequests ?? [],
+        stageEvents: (audit.stageEvents ?? []).map((event) => ({
+          action: event.action,
+          toStage: event.toStage,
+          createdAt: event.createdAt instanceof Date ? event.createdAt.toISOString() : String(event.createdAt),
+        })),
+      }))} />
 
       <DashboardStats 
         activeCount={activeAudits.length}

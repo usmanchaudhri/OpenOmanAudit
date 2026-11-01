@@ -11,6 +11,8 @@ export default function NewAudit() {
   const [category, setCategory] = useState('');
   const [auditNumber, setAuditNumber] = useState('');
   const [objective, setObjective] = useState('');
+  const [auditYear, setAuditYear] = useState('');
+  const [dueDate, setDueDate] = useState('');
   const [saving, setSaving] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -25,7 +27,9 @@ export default function NewAudit() {
           title, 
           category,
           auditNumber,
-          objective, 
+          objective,
+          auditYear,
+          dueDate,
           status: 'In Progress' 
         }),
       });
@@ -58,7 +62,7 @@ export default function NewAudit() {
               value={title}
               onChange={e => setTitle(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-              placeholder="e.g. Q3 Financial Audit"
+              placeholder="e.g. Al Noor Trading LLC"
             />
           </div>
 
@@ -87,6 +91,30 @@ export default function NewAudit() {
             </div>
           </div>
           
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label htmlFor="auditYear" className="block text-sm font-medium text-gray-700 mb-1">Audit year</label>
+              <input
+                id="auditYear"
+                type="text"
+                value={auditYear}
+                onChange={e => setAuditYear(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                placeholder="e.g. FY2025"
+              />
+            </div>
+            <div>
+              <label htmlFor="dueDate" className="block text-sm font-medium text-gray-700 mb-1">Due date</label>
+              <input
+                id="dueDate"
+                type="date"
+                value={dueDate}
+                onChange={e => setDueDate(e.target.value)}
+                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+
           <div>
             <label htmlFor="objective" className="block text-sm font-medium text-gray-700 mb-1">Audit Objective</label>
             <textarea

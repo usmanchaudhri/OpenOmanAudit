@@ -29,6 +29,11 @@ export default function UserManagementPage() {
   const router = useRouter();
 
   const ROLES = [
+    'Client',
+    'Coordinator',
+    'Preparer',
+    'Reviewer',
+    'Licensed Auditor',
     'Auditor', 
     'Specialist', 
     'Audit Manager', 
@@ -282,13 +287,9 @@ export default function UserManagementPage() {
                   onChange={(e) => setFormData({ ...formData, role: e.target.value })}
                   className="w-full pl-12 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500/50 transition-all text-slate-900 appearance-none font-semibold text-sm outline-none shadow-inner"
                 >
-                  <option value="Auditor">Auditor</option>
-                  <option value="Specialist">Specialist</option>
-                  <option value="Audit Manager">Audit Manager</option>
-                  <option value="Audit Director">Audit Director</option>
-                  <option value="Audit Partner">Audit Partner</option>
-                  <option value="Business Operations">Business Operations</option>
-                  <option value="IT Administrator">IT Administrator</option>
+                  {ROLES.map(role => (
+                    <option key={role} value={role}>{role}</option>
+                  ))}
                 </select>
                 <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
               </div>

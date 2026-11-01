@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { canAccessAudit, canAccessProcedure } from '@/lib/audit-access';
+import { canClientUpload, canEditChecklist, isClientRole, isLicensedAuditor } from '@/lib/engagement';
 import fs from 'fs/promises';
 import path from 'path';
 import crypto from 'crypto';
@@ -125,7 +126,77 @@ export async function POST(req: Request) {
       return NextResponse.json(updated);
     }
 
+    if (cleanAuditId && cleanType === 'document') {
+      const documentId = formData.get('documentId')?.toString();
+      if (!documentId) return NextResponse.json({ error: 'documentId is required' }, { status: 400 });
+
+      const document = await prisma.documentRequest.findFirst({
+        where: { id: documentId, auditId: cleanAuditId },
+        include: { audit: { select: { engagementStage: true, releasedAt: true } } },
+      });
+      if (!document) return NextResponse.json({ error: 'Document not found' }, { status: 404 });
+      if (document.audit.releasedAt) {
+        return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
+      }
+
+      const role = session.user.role;
+      const allowed = isClientRole(role)
+        ? canClientUpload(role, document.audit.engagementStage, document.status, false)
+        : canEditChecklist(role, document.audit.engagementStage, false);
+      if (!allowed) return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+
+      const updated = await prisma.documentRequest.update({
+        where: { id: document.id },
+        data: {
+          fileUrl: `/uploads/${diskFilename}`,
+          fileName: filenameAttr,
+          status: 'Submitted',
+          updatedBy: session.user.username,
+        },
+      });
+      return NextResponse.json(updated);
+    }
+
+    if (cleanAuditId && cleanType === 'release') {
+      if (!isLicensedAuditor(session.user.role)) {
+        return NextResponse.json({ error: 'Only the licensed auditor can upload the signed report.' }, { status: 403 });
+      }
+      if (!filenameAttr.toLowerCase().endsWith('.pdf')) {
+        return NextResponse.json({ error: 'The released report must be a PDF.' }, { status: 400 });
+      }
+      const audit = await prisma.audit.findUnique({
+        where: { id: cleanAuditId },
+        select: { engagementStage: true, releasedAt: true, releasedReportUrl: true },
+      });
+      if (!audit) return NextResponse.json({ error: 'Audit not found' }, { status: 404 });
+      if (audit.releasedAt) {
+        return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
+      }
+      if (audit.engagementStage !== 'Final approval') {
+        return NextResponse.json({ error: 'Upload the signed PDF during final approval.' }, { status: 400 });
+      }
+      if (audit.releasedReportUrl) {
+        try { await fs.unlink(path.join(process.cwd(), 'storage', audit.releasedReportUrl)); } catch { /* ignore */ }
+      }
+      const updated = await prisma.audit.update({
+        where: { id: cleanAuditId },
+        data: {
+          releasedReportUrl: `/uploads/${diskFilename}`,
+          releasedReportName: filenameAttr,
+        },
+      });
+      return NextResponse.json(updated);
+    }
+
     if (!cleanProcedureId) return NextResponse.json({ error: 'procedureId required' }, { status: 400 });
+
+    const parent = await prisma.procedure.findUnique({
+      where: { id: cleanProcedureId },
+      select: { audit: { select: { releasedAt: true } } },
+    });
+    if (parent?.audit.releasedAt) {
+      return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
+    }
 
     const aggregate = await prisma.attachment.aggregate({
       where: { procedureId: cleanProcedureId },

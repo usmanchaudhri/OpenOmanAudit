@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { getSession } from '@/lib/auth';
 import { canAccessProcedure } from '@/lib/audit-access';
+import { isClientRole } from '@/lib/engagement';
 import DOMPurify from 'isomorphic-dompurify';
 
 export async function POST(
@@ -17,8 +18,16 @@ export async function POST(
     const params = await props.params;
     
     const allowed = await canAccessProcedure(session.user, params.id);
-    if (!allowed) {
+    if (!allowed || isClientRole(session.user.role)) {
       return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    }
+
+    const locked = await prisma.procedure.findUnique({
+      where: { id: params.id },
+      select: { audit: { select: { releasedAt: true } } },
+    });
+    if (locked?.audit.releasedAt) {
+      return NextResponse.json({ error: 'This engagement is released and locked.' }, { status: 423 });
     }
 
     const body = await req.json();

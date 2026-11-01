@@ -4,7 +4,10 @@ import { ArrowLeft } from 'lucide-react';
 import { notFound, redirect } from 'next/navigation';
 import AuditTabs from '@/components/AuditTabs';
 import EditableAuditHeader from '@/components/EditableAuditHeader';
+import EngagementPanel, { type EngagementAudit } from '@/components/engagement/EngagementPanel';
+import ClientPortal from '@/components/engagement/ClientPortal';
 import { getSession } from '@/lib/auth';
+import { clientVisibleEvent, isClientRole } from '@/lib/engagement';
 import type { TeamMember } from '@prisma/client';
 import type { AuditWithRelations } from '@/lib/types';
 
@@ -23,6 +26,13 @@ interface AuditRaw {
   fieldworkStartDate: Date | null;
   fieldworkEndDate: Date | null;
   reportIssuedDate: Date | null;
+  engagementStage: string | null;
+  stageOwner: string | null;
+  dueDate: Date | null;
+  auditYear: string | null;
+  releasedAt: Date | null;
+  releasedBy: string | null;
+  releasedReportName: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -123,6 +133,43 @@ export default async function AuditDetail(props: { params: Promise<{ id: string 
       }
     }
 
+    if (!isUnauthorized && isClientRole(userRole)) {
+      const [documentRequests, stageEvents] = await Promise.all([
+        prisma.documentRequest.findMany({ where: { auditId: auditBase.id }, orderBy: { createdAt: 'asc' } }),
+        prisma.stageEvent.findMany({ where: { auditId: auditBase.id }, orderBy: { createdAt: 'asc' } }),
+      ]);
+      const clientAudit: EngagementAudit = {
+        id: auditBase.id,
+        title: auditBase.title,
+        auditYear: auditBase.auditYear,
+        engagementStage: auditBase.engagementStage || 'Onboarding',
+        stageOwner: auditBase.stageOwner,
+        dueDate: auditBase.dueDate ? new Date(auditBase.dueDate).toISOString() : null,
+        releasedAt: auditBase.releasedAt ? new Date(auditBase.releasedAt).toISOString() : null,
+        releasedBy: null,
+        releasedReportName: auditBase.releasedAt ? auditBase.releasedReportName : null,
+        role: userRole,
+        documents: documentRequests.map((document) => ({
+          id: document.id,
+          name: document.name,
+          status: document.status,
+          note: document.note,
+          fileName: document.fileName,
+          updatedBy: document.updatedBy,
+        })),
+        events: stageEvents.filter((event) => clientVisibleEvent(event)).map((event) => ({
+          id: event.id,
+          fromStage: event.fromStage,
+          toStage: event.toStage,
+          action: event.action,
+          note: event.action === 'return' ? event.note : null,
+          performedBy: event.performedBy,
+          createdAt: event.createdAt.toISOString(),
+        })),
+      };
+      return <ClientPortal audit={clientAudit} />;
+    }
+
     if (!isUnauthorized) {
       let rawGroups: ProcedureGroupRaw[] = [];
       try {
@@ -211,6 +258,39 @@ export default async function AuditDetail(props: { params: Promise<{ id: string 
   if (!auditData) notFound();
 
   const { auditBase, teamMembers, rawGroups, proceduresWithRelations } = auditData;
+  const [documentRequests, stageEvents] = await Promise.all([
+    prisma.documentRequest.findMany({ where: { auditId: auditBase.id }, orderBy: { createdAt: 'asc' } }),
+    prisma.stageEvent.findMany({ where: { auditId: auditBase.id }, orderBy: { createdAt: 'asc' } }),
+  ]);
+  const engagementAudit: EngagementAudit = {
+    id: auditBase.id,
+    title: auditBase.title,
+    auditYear: auditBase.auditYear,
+    engagementStage: auditBase.engagementStage || 'Onboarding',
+    stageOwner: auditBase.stageOwner,
+    dueDate: auditBase.dueDate ? new Date(auditBase.dueDate).toISOString() : null,
+    releasedAt: auditBase.releasedAt ? new Date(auditBase.releasedAt).toISOString() : null,
+    releasedBy: auditBase.releasedBy,
+    releasedReportName: auditBase.releasedReportName,
+    role: userRole,
+    documents: documentRequests.map((document) => ({
+      id: document.id,
+      name: document.name,
+      status: document.status,
+      note: document.note,
+      fileName: document.fileName,
+      updatedBy: document.updatedBy,
+    })),
+    events: stageEvents.map((event) => ({
+      id: event.id,
+      fromStage: event.fromStage,
+      toStage: event.toStage,
+      action: event.action,
+      note: event.note,
+      performedBy: event.performedBy,
+      createdAt: event.createdAt.toISOString(),
+    })),
+  };
 
   const groupsWithProcedures = rawGroups.map(group => ({
     ...group,
@@ -234,6 +314,7 @@ export default async function AuditDetail(props: { params: Promise<{ id: string 
       </Link>
 
       <EditableAuditHeader audit={finalAuditData as unknown as AuditWithRelations} userRole={userRole} />
+      <EngagementPanel audit={engagementAudit} />
       <AuditTabs audit={finalAuditData as unknown as AuditWithRelations} user={session.user} />
     </div>
   );

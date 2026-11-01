@@ -4,7 +4,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - openworkpaper-uploads:/app/public/uploads
+      - openworkpaper-uploads:/app/storage/uploads
       - openworkpaper-db:/app/prisma/data
     environment:
       - JWT_SECRET=${JWT_SECRET}

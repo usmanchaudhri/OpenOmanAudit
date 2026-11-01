@@ -1,5 +1,5 @@
 'use client';
-/** OpenWorkpaper ProcedureDetail - Full Page Editor with Auto-Save **/
+/** OpenOman Audit Manager ProcedureDetail - Full Page Editor with Auto-Save **/
 import { useState, useMemo } from 'react';
 import type { TeamMember } from '@prisma/client';
 import type { ProcedureWithRelations } from '@/lib/types';

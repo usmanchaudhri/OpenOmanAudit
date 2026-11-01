@@ -60,7 +60,7 @@ export default function ManagementInsights({
       if (!response.ok) throw new Error('Export failed');
       
       const blob = await response.blob();
-      saveAs(blob, `OpenWorkpaper_Global_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+      saveAs(blob, `OpenOman_Audit_Manager_Global_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
     } catch (error) {
       console.error('Export error:', error);
       alert('Failed to generate global report. Please try again.');

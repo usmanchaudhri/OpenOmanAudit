@@ -110,7 +110,8 @@ export function useProcedureState({
         
         router.refresh();
       } else if (res.status === 423) {
-        toast.error("This procedure is locked for review and cannot be saved.");
+        const body = await res.json().catch(() => null);
+        toast.error(body?.error || "This procedure is locked and cannot be saved.");
       } else {
         toast.error("Failed to save changes.");
       }

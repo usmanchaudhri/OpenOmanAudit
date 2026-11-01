@@ -1,10 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { decrypt } from '@/lib/auth';
 
+function isInternalWorkpaperPath(pathname: string) {
+  return pathname.includes('/procedures')
+    || pathname.startsWith('/api/procedures')
+    || pathname.startsWith('/api/attachments')
+    || pathname.startsWith('/api/procedure-groups')
+    || pathname.startsWith('/api/reports')
+    || pathname.startsWith('/admin')
+    || pathname.startsWith('/audit-logs')
+    || pathname.includes('/backup')
+    || pathname.includes('/apply-template');
+}
+
 function isPublicPath(pathname: string) {
   return pathname === '/login' ||
     pathname.startsWith('/api/login') || 
     pathname.startsWith('/api/auth/sso') ||
+    pathname === '/api/health' ||
     pathname.startsWith('/_next') || 
     pathname === '/favicon.ico';
 }
@@ -24,7 +37,14 @@ async function handleLoginAccess(request: NextRequest, session: string | undefin
 async function verifyAuth(request: NextRequest, session: string, pathname: string, response: NextResponse) {
   try {
     const decrypted = await decrypt(session);
-    const user = (decrypted as { user: { mustChangePassword?: boolean } }).user;
+    const user = (decrypted as { user: { mustChangePassword?: boolean; role?: string } }).user;
+
+    if (user?.role === 'Client' && isInternalWorkpaperPath(pathname)) {
+      if (pathname.startsWith('/api/')) {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+      }
+      return NextResponse.redirect(new URL('/', request.url));
+    }
 
     // Check if user must change password
     if (user?.mustChangePassword && 

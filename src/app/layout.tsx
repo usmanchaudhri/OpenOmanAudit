@@ -10,8 +10,8 @@ const inter = Inter({ subsets: ['latin'] });
 export const dynamic = 'force-dynamic';
 
 export const metadata: Metadata = {
-  title: 'OpenWorkpaper - Audit Management',
-  description: 'Open Source Audit Management System',
+  title: 'OpenOman Audit Manager',
+  description: 'Audit Management Software',
 };
 
 export default async function RootLayout({
